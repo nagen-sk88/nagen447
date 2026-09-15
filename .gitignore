@@ -1,0 +1,13 @@
+kernel-out/
+modules-out/
+*.o
+*.ko
+*.a
+*.so
+*.img
+*.zip
+*.tar
+*.tar.gz
+*.bak
+*.backup
+*.tmp
