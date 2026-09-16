@@ -1,44 +1,70 @@
-name: Kernel Compilation
+name: SM-A042F Kernel Build
 
 on:
   workflow_dispatch:
-    inputs:      
-      tag:
-        description: 'Release Tag'
-        required: true    
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: false
 
-    - name: Set up build environment
-      run: |
-        sudo apt update -y  
-        sudo apt install libncurses5-dev -y
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc bison build-essential flex \
+            libssl-dev libelf-dev \
+            libncurses5-dev libncurses-dev \
+            python3 cpio rsync unzip wget git \
+            gcc-aarch64-linux-gnu
 
-    - name: Compile Kernel
-      run: |
-        bash build_kernel.sh
+      - name: Download Android Clang r383902
+        run: |
+          git clone --depth=1 \
+            --branch android12-release \
+            https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 \
+            "$HOME/clang-prebuilt"
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: KernelSU-Next-SM-A042F-${{ github.event.inputs.tag }}
-        path: build/*.tar
+          test -x "$HOME/clang-prebuilt/clang-r383902/bin/clang"
 
-    - name: Create release
-      uses: ncipollo/release-action@v1
-      with:
-        tag: ${{ github.event.inputs.tag }}
-        name: "KernelSU-Next-SM-A042F-${{ github.event.inputs.tag }}"
-        draft: false
-        prerelease: false
-        token: ${{ secrets.TOKEN }}          
-        artifacts: "build/*.tar"
-        body: "Commit SHA: ${{ github.sha }}"
+      - name: Verify toolchain
+        run: |
+          "$HOME/clang-prebuilt/clang-r383902/bin/clang" --version
+          aarch64-linux-gnu-gcc --version
+
+      - name: Prepare configuration
+        run: |
+          cp custom.config .config
+
+          make ARCH=arm64 \
+            CROSS_COMPILE=aarch64-linux-gnu- \
+            CC="$HOME/clang-prebuilt/clang-r383902/bin/clang" \
+            CLANG_TRIPLE=aarch64-linux-gnu- \
+            olddefconfig
+
+      - name: Build kernel
+        run: |
+          make -j"$(nproc)" \
+            ARCH=arm64 \
+            CROSS_COMPILE=aarch64-linux-gnu- \
+            CC="$HOME/clang-prebuilt/clang-r383902/bin/clang" \
+            CLANG_TRIPLE=aarch64-linux-gnu- \
+            O=out \
+            Image.gz
+
+      - name: Verify kernel
+        run: |
+          test -f out/arch/arm64/boot/Image.gz
+          ls -lh out/arch/arm64/boot/Image.gz
+
+      - name: Upload kernel
+        uses: actions/upload-artifact@v4
+        with:
+          name: SM-A042F-kernel
+          path: out/arch/arm64/boot/Image.gz
