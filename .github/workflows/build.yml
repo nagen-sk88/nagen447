@@ -25,3 +25,4 @@ jobs:
           config: a04e_defconfig
           arch: arm64
           aosp-clang: true
+          aosp-gcc: true
