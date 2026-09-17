@@ -28,4 +28,4 @@ jobs:
           aosp-gcc: true
           android-version: 12
           aosp-clang-version: r383902
-          extra-make-args: LLVM=1
+          extra-make-args: LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CLANG_TRIPLE=aarch64-linux-gnu-
