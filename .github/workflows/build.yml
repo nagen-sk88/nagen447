@@ -28,3 +28,4 @@ jobs:
           aosp-gcc: true
           android-version: 12
           aosp-clang-version: r383902
+          extra-make-args: LLVM=1
