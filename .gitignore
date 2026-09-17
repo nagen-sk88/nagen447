@@ -13,3 +13,4 @@ modules-out/
 *.tmp
 
 toolchains/
+.config
