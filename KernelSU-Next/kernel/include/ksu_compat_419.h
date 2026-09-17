@@ -1,6 +1,7 @@
 #ifndef __KSU_COMPAT_419_H
 #define __KSU_COMPAT_419_H
 
+#include <linux/string.h>
 #include <linux/version.h>
 #include <linux/uaccess.h>
 
@@ -30,6 +31,14 @@
 	copy_to_user((to), (from), (n))
 #endif
 
+
 #endif /* LINUX_VERSION_CODE < 5.8.0 */
 
 #endif /* __KSU_COMPAT_419_H */
+
+#ifndef copy_to_kernel_nofault
+#define copy_to_kernel_nofault(to, from, n) ({ \
+    memcpy((to), (from), (n)); \
+    0; \
+})
+#endif
