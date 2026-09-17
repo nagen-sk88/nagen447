@@ -15,6 +15,7 @@
 #include <linux/printk.h>
 #include <linux/types.h>
 #include <linux/uaccess.h>
+#include "ksu_compat_419.h"
 #include <linux/namei.h>
 #include <linux/workqueue.h>
 #include <linux/uio.h>

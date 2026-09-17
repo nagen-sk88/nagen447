@@ -6,6 +6,7 @@
 #include <linux/printk.h>
 #include <linux/mm.h>
 #include <linux/uaccess.h>
+#include "ksu_compat_419.h"
 #include <asm/current.h>
 #include <linux/cred.h>
 #include <linux/fs.h>
